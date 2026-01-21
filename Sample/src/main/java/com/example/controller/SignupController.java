@@ -1,0 +1,54 @@
+package com.example.controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.application.service.UserApplicationService;
+import com.example.form.GroupOrder;
+import com.example.form.SignupForm;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@RequestMapping("/user")
+@Slf4j		//Simple Logging Facade for Javaの略
+public class SignupController {
+
+	@Autowired
+	UserApplicationService userApplicationService;
+	
+	/** ユーザー登録画面表示 */
+	@GetMapping("/signup")
+	public String getSignup(Model model, @ModelAttribute SignupForm form) {		//空のformをモデルに入れて準備
+		//性別を取得
+		Map<String, Integer> genderMap = userApplicationService.getGenderMap();
+		model.addAttribute("genderMap", genderMap);
+		
+		//ユーザー登録画面に遷移
+		return "user/signup";
+	}
+	
+	/** ユーザー登録処理 */
+	@PostMapping("/signup")
+	public String postSignup(Model model, @ModelAttribute @Validated(GroupOrder.class) SignupForm form, BindingResult bindingResult) {		//入力されたformをモデルに格納
+		//入力チェック
+		if(bindingResult.hasErrors()) {
+			return getSignup(model, form);
+		}
+		
+		log.info(form.toString());
+		
+		return "redirect:/login";		//PRGパターン：リダイレクト先のパス（URL）指定
+	}
+	
+	
+}
